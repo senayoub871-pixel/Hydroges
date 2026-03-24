@@ -114,10 +114,13 @@ export function DocumentPageTemplate({ title, description, params, cardActions, 
             displayDocs.map((doc) => {
               const isActive = selectedDocId === doc.id;
               return (
-                <button
+                <div
                   key={doc.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setSelectedDocId(isActive ? null : doc.id)}
-                  className="w-full text-left rounded-2xl transition-all duration-200"
+                  onKeyDown={(e) => e.key === "Enter" && setSelectedDocId(isActive ? null : doc.id)}
+                  className="w-full text-left rounded-2xl transition-all duration-200 cursor-pointer"
                   style={{
                     background: isActive
                       ? "linear-gradient(135deg, #5b4d90, #7b65b0)"
@@ -190,7 +193,7 @@ export function DocumentPageTemplate({ title, description, params, cardActions, 
                       {cardActions(doc)}
                     </div>
                   )}
-                </button>
+                </div>
               );
             })
           )}
