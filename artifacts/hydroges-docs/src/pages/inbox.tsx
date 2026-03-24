@@ -5,9 +5,9 @@ export default function InboxPage() {
   return (
     <AppLayout>
       <DocumentPageTemplate
-        title="Boîte de Réception"
-        description="Consultez les documents qui vous ont été envoyés."
-        params={{ role: "recipient" }}
+        title="Liste de documents"
+        description="Tous les documents que vous avez créés — envoyés, en attente, brouillons."
+        params={{ role: "sender" }}
       />
     </AppLayout>
   );
