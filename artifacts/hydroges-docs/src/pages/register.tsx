@@ -82,7 +82,7 @@ export default function RegisterPage() {
   }) => (
     <div className="flex items-center gap-3 mb-3">
       <span
-        className="w-52 text-right font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70"
+        className="w-52 font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70 text-center"
         style={{ color: "#1e1b6b" }}
       >
         {label}
