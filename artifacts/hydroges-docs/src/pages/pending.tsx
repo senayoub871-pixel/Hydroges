@@ -6,8 +6,8 @@ export default function PendingPage() {
     <AppLayout>
       <DocumentPageTemplate
         title="En cours de validation"
-        description="Documents en attente de validation — envoyés ou reçus."
-        params={{ status: "pending_validation" }}
+        description="Documents que vous avez envoyés en attente de signature."
+        params={{ status: "pending_validation", role: "sender" }}
       />
     </AppLayout>
   );
