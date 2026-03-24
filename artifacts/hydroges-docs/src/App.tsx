@@ -14,6 +14,7 @@ import ScheduledPage from "@/pages/scheduled";
 import OutboxPage from "@/pages/outbox";
 import DraftsPage from "@/pages/drafts";
 import PendingPage from "@/pages/pending";
+import SettingsPage from "@/pages/settings";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import NotFound from "@/pages/not-found";
@@ -70,6 +71,9 @@ function Router() {
         </Route>
         <Route path="/pending">
           <ProtectedRoute><PendingPage /></ProtectedRoute>
+        </Route>
+        <Route path="/settings">
+          <ProtectedRoute><SettingsPage /></ProtectedRoute>
         </Route>
         <Route component={NotFound} />
       </Switch>

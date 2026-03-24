@@ -126,6 +126,57 @@ export function useAppDeleteDocument() {
   });
 }
 
+// ─── Profile / Signature ──────────────────────────────────────────────────────
+
+export interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  department: string;
+  role: string | null;
+  signatureImage: string | null;
+}
+
+function getToken() {
+  return localStorage.getItem("hydroges_token") || "";
+}
+
+export function useProfile() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async (): Promise<UserProfile> => {
+      const res = await fetch("/api/profile", {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error("Impossible de charger le profil");
+      return res.json();
+    },
+    enabled: !!user,
+  });
+}
+
+export function useUpdateSignature() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (signatureImage: string | null) => {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ signatureImage }),
+      });
+      if (!res.ok) throw new Error("Impossible de mettre à jour la signature");
+      return res.json() as Promise<UserProfile>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+  });
+}
+
 // ─── Scheduled auto-dispatcher ────────────────────────────────────────────────
 
 export function useScheduledDispatcher(onDispatched?: (title: string) => void) {

@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import type { Document } from "@workspace/api-client-react";
 import { formatFrenchDate } from "@/lib/utils";
-import { X, Stamp, Download, FileText, FileSpreadsheet, File, Send } from "lucide-react";
-import { useAppSignDocument } from "@/hooks/use-app-data";
+import { X, Stamp, Download, FileText, FileSpreadsheet, File, Send, AlertCircle } from "lucide-react";
+import { useAppSignDocument, useProfile } from "@/hooks/use-app-data";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 
@@ -95,6 +95,7 @@ export function DocumentViewer({ document, onClose, onSend }: DocumentViewerProp
   const signMutation = useAppSignDocument();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { data: profile } = useProfile();
   const paperRef = useRef<HTMLDivElement>(null);
 
   const hasExistingSig = document?.signatureX != null && document?.signatureY != null;
@@ -132,21 +133,33 @@ export function DocumentViewer({ document, onClose, onSend }: DocumentViewerProp
 
   const handleValidate = async () => {
     if (!placedSig) return;
-    const qrValue = `HG-${document.id}-${document.senderName?.replace(/ /g, "")}-${Date.now()}`;
+    const sigImage = profile?.signatureImage;
+    if (!sigImage) {
+      toast({
+        title: "Aucune signature enregistrée",
+        description: "Veuillez d'abord téléverser votre signature dans les Paramètres.",
+        variant: "destructive",
+      });
+      return;
+    }
     try {
       await signMutation.mutateAsync({
         id: document.id,
-        data: { signatureData: qrValue, signatureX: placedSig.x, signatureY: placedSig.y },
+        data: { signatureData: sigImage, signatureX: placedSig.x, signatureY: placedSig.y },
       });
-      setSigValue(qrValue);
-      toast({ title: "Document signé", description: "La signature QR a été apposée avec succès." });
+      setSigValue(sigImage);
+      toast({ title: "Document signé", description: "Votre signature numérique a été apposée avec succès." });
     } catch {
       toast({ title: "Erreur", description: "Impossible de signer le document.", variant: "destructive" });
     }
   };
 
   const isRecipient = user?.id != null && document.recipientId === user.id;
-  const canSign = isRecipient && !sigValue && !document.signedAt;
+  const isSender = user?.id != null && document.senderId === user.id;
+  const canSign =
+    !sigValue &&
+    !document.signedAt &&
+    (isRecipient || (isSender && document.status === "pending_validation"));
 
   const handleDownload = () => {
     if (!isBase64) return;
@@ -192,12 +205,21 @@ export function DocumentViewer({ document, onClose, onSend }: DocumentViewerProp
               </span>
             </label>
           )}
+          {canSign && !profile?.signatureImage && (
+            <span
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full"
+              style={{ background: "#fef3c7", color: "#92400e" }}
+            >
+              <AlertCircle className="w-3.5 h-3.5" />
+              Aucune signature — rendez-vous dans Paramètres
+            </span>
+          )}
           {signMode && (
             <span
               className="text-xs font-medium px-3 py-1 rounded-full animate-pulse"
               style={{ background: "#ebe9f6", color: "#5b4d90" }}
             >
-              Cliquez sur le document pour placer le tampon
+              Cliquez sur le document pour placer votre signature
             </span>
           )}
           {sigValue && (
@@ -328,21 +350,47 @@ export function DocumentViewer({ document, onClose, onSend }: DocumentViewerProp
               />
             )}
 
-            {/* QR stamp — above the click overlay (z-20) */}
+            {/* Signature stamp — above the click overlay (z-20) */}
             {placedSig && (
               <div
                 className="absolute pointer-events-none"
                 style={{ left: `${placedSig.x}%`, top: `${placedSig.y}%`, transform: "translate(-50%, -50%)", zIndex: 20 }}
               >
                 {sigValue ? (
-                  <div className="flex flex-col items-center">
-                    <QRCodeSVG value={sigValue} size={88} />
-                    <span className="text-[9px] font-bold mt-0.5" style={{ color: "#1e1b6b" }}>HYDROGES</span>
+                  <div
+                    className="flex flex-col items-center"
+                    style={{
+                      border: "2px solid #1e1b6b",
+                      borderRadius: 6,
+                      background: "rgba(255,255,255,0.92)",
+                      padding: "4px 6px",
+                      boxShadow: "0 2px 8px rgba(30,27,107,0.18)",
+                    }}
+                  >
+                    <img
+                      src={sigValue.startsWith("data:") ? sigValue : undefined}
+                      alt="Signature"
+                      style={{ maxWidth: 120, maxHeight: 60, objectFit: "contain", display: "block" }}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                    />
+                    <span className="text-[8px] font-bold mt-0.5 tracking-widest uppercase" style={{ color: "#1e1b6b" }}>
+                      Signé — HYDROGES
+                    </span>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center opacity-60">
-                    <Stamp className="w-9 h-9" style={{ color: "#5b4d90" }} />
-                    <span className="text-[10px] font-semibold mt-0.5" style={{ color: "#5b4d90" }}>signature</span>
+                  <div className="flex flex-col items-center opacity-70">
+                    {profile?.signatureImage ? (
+                      <img
+                        src={profile.signatureImage}
+                        alt="Aperçu signature"
+                        style={{ maxWidth: 100, maxHeight: 50, objectFit: "contain", opacity: 0.5 }}
+                      />
+                    ) : (
+                      <Stamp className="w-9 h-9" style={{ color: "#5b4d90" }} />
+                    )}
+                    <span className="text-[10px] font-semibold mt-0.5" style={{ color: "#5b4d90" }}>
+                      {profile?.signatureImage ? "Cliquez Validation" : "Aucune signature"}
+                    </span>
                   </div>
                 )}
               </div>

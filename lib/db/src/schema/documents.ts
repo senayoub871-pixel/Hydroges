@@ -14,6 +14,7 @@ export const usersTable = pgTable("users", {
   passwordSalt: text("password_salt"),
   companyNumber: text("company_number").default("0125.6910.0681"),
   role: text("role").default("Employé"),
+  signatureImage: text("signature_image"),
 });
 
 export const documentsTable = pgTable("documents", {

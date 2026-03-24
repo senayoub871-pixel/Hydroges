@@ -17,6 +17,7 @@ router.post("/register", async (req, res) => {
       role,
       companyNumber,
       avatarInitials,
+      signatureImage,
     } = req.body;
 
     if (!loginId || !password || !name || !email || !department) {
@@ -63,6 +64,7 @@ router.post("/register", async (req, res) => {
         passwordHash: hash,
         passwordSalt: salt,
         avatarInitials: initials,
+        signatureImage: signatureImage || null,
       })
       .returning();
 

@@ -43,6 +43,16 @@ export default function RegisterPage() {
       return;
     }
     setLoading(true);
+
+    let signatureImage: string | undefined;
+    if (form.signature) {
+      signatureImage = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(form.signature!);
+      });
+    }
+
     const result = await register({
       nom: form.nom,
       prenom: form.prenom,
@@ -51,6 +61,7 @@ export default function RegisterPage() {
       email: form.email,
       userId: form.userId,
       password: form.password,
+      signatureImage,
     });
     setLoading(false);
     if (result.ok) {

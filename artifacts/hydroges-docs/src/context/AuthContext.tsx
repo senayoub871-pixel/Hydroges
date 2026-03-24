@@ -25,6 +25,7 @@ interface AuthContextType {
     email: string;
     userId: string;
     password: string;
+    signatureImage?: string;
   }) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
 }
@@ -90,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string;
     userId: string;
     password: string;
+    signatureImage?: string;
   }): Promise<{ ok: boolean; error?: string }> => {
     try {
       const name = `${data.prenom} ${data.nom}`.trim();
@@ -107,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: data.poste || "Employé",
           companyNumber: "0125.6910.0681",
           avatarInitials: initials,
+          signatureImage: data.signatureImage || null,
         }),
       });
       const body = await res.json();
