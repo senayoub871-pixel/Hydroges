@@ -40,7 +40,7 @@ async function seed() {
     };
   });
 
-  const [ahmed, fatima, karim, sara, hassan] = await db
+  const [ahmed, fatima, karim, sara, hassan, nadia, omar, leila] = await db
     .insert(usersTable)
     .values(insertValues)
     .returning();
@@ -124,6 +124,45 @@ async function seed() {
       fileType: "PDF",
       fileSize: "210 KB",
       category: "Procédure",
+    },
+    {
+      title: "Avenant au Contrat de Travail - Karim Mansouri",
+      content: `AVENANT AU CONTRAT DE TRAVAIL\n\nEntre:\nHYDROGES S.P.A., représentée par Ahmed Benali, Directeur Général\n\nEt:\nKarim Mansouri, Chef Service Finance & Comptabilité\n\nOBJET:\nLe présent avenant modifie le contrat de travail initial afin de refléter la nouvelle classification et la revalorisation salariale accordée suite à l'évaluation annuelle.\n\nARTICLE 1 - POSTE\nM. Karim Mansouri est confirmé dans ses fonctions de Chef Service Finance & Comptabilité.\n\nARTICLE 2 - RÉMUNÉRATION\nSon salaire mensuel brut est porté à 185 000 DZD à compter du 1er Avril 2026.\n\nCe document requiert la signature du destinataire pour validation.\n\nFait à Alger, le 24 Mars 2026\nAhmed Benali\nDirecteur Général`,
+      status: "pending_validation",
+      senderId: ahmed.id,
+      senderName: ahmed.name,
+      recipientId: karim.id,
+      recipientName: karim.name,
+      recipientEmail: karim.email,
+      fileType: "PDF",
+      fileSize: "155 KB",
+      category: "Contrat",
+    },
+    {
+      title: "Validation - Plan de Formation 2026",
+      content: `DEMANDE DE VALIDATION\n\nObjet: Plan de Formation du Personnel 2026\n\nMadame la Directrice des Ressources Humaines,\n\nJe vous soumets ci-joint le plan de formation annuel pour validation et signature.\n\nCE PLAN COMPREND:\n- Formation en gestion de projet (15 agents)\n- Formation en hygiène et sécurité (tous les agents)\n- Formation en outils bureautiques (8 agents)\n- Formation en langue française (5 agents)\n\nBUDGET TOTAL PRÉVISIONNEL: 2 400 000 DZD\n\nMerci de bien vouloir valider ce document par votre signature afin de procéder aux inscriptions.\n\nCordialement,\nHassan Boudiaf\nChef Service Operations`,
+      status: "pending_validation",
+      senderId: hassan.id,
+      senderName: hassan.name,
+      recipientId: fatima.id,
+      recipientName: fatima.name,
+      recipientEmail: fatima.email,
+      fileType: "DOCX",
+      fileSize: "198 KB",
+      category: "Formation",
+    },
+    {
+      title: "Accord de Confidentialité - Projet Infrastructure",
+      content: `ACCORD DE CONFIDENTIALITÉ\n\nEntre:\nHYDROGES S.P.A.\nReprésentée par: Nadia Belkaid, Directrice de l'Hydraulique\n\nEt:\nOmar Kheloufi, Ingénieur Subdivisionnaire\n\nARTICLE 1 - OBJET\nLe présent accord a pour objet de définir les conditions dans lesquelles les informations relatives au Projet d'Infrastructure Hydraulique 2026-2027 seront traitées.\n\nARTICLE 2 - ENGAGEMENTS\nLes parties s'engagent à:\n- Ne pas divulguer les informations confidentielles à des tiers\n- Utiliser ces informations uniquement dans le cadre du projet\n- Protéger les documents avec les mesures de sécurité appropriées\n\nARTICLE 3 - DURÉE\nCet accord est valable pour une durée de 3 ans.\n\nVotre signature est requise pour valider cet accord.\n\nFait à Alger, le 24 Mars 2026`,
+      status: "pending_validation",
+      senderId: nadia.id,
+      senderName: nadia.name,
+      recipientId: omar.id,
+      recipientName: omar.name,
+      recipientEmail: omar.email,
+      fileType: "PDF",
+      fileSize: "142 KB",
+      category: "Juridique",
     },
   ]);
 
