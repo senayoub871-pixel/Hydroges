@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import type { Document } from "@workspace/api-client-react";
 import { formatFrenchDate } from "@/lib/utils";
-import { X, Stamp, Download, FileText, FileSpreadsheet, File } from "lucide-react";
+import { X, Stamp, Download, FileText, FileSpreadsheet, File, Send } from "lucide-react";
 import { useAppSignDocument } from "@/hooks/use-app-data";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 interface DocumentViewerProps {
   document: Document | null;
   onClose: () => void;
+  onSend?: () => void;
 }
 
 function QRCodeSVG({ value, size = 90 }: { value: string; size?: number }) {
@@ -90,7 +91,7 @@ function OfficeDownloadCard({
   );
 }
 
-export function DocumentViewer({ document, onClose }: DocumentViewerProps) {
+export function DocumentViewer({ document, onClose, onSend }: DocumentViewerProps) {
   const signMutation = useAppSignDocument();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -167,6 +168,16 @@ export function DocumentViewer({ document, onClose }: DocumentViewerProps) {
         style={{ background: "#f8f7fc", borderBottom: "1.5px solid #eceef8" }}
       >
         <div className="flex items-center gap-3">
+          {onSend && (
+            <button
+              onClick={onSend}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-opacity hover:opacity-90"
+              style={{ background: "linear-gradient(135deg, #5b4d90, #7b65b0)" }}
+            >
+              <Send className="w-3.5 h-3.5" />
+              Envoyer
+            </button>
+          )}
           {canSign && (
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input

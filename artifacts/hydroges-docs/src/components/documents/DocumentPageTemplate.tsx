@@ -3,11 +3,14 @@ import { useAppDocuments, type AppDocumentParams } from "@/hooks/use-app-data";
 import { formatFrenchDate, cn, getStatusColor, getStatusLabel } from "@/lib/utils";
 import { DocumentViewer } from "./DocumentViewer";
 import { FileText, Search, Clock, ArrowRight } from "lucide-react";
+import type { Document } from "@workspace/api-client-react";
 
 interface DocumentPageTemplateProps {
   title: string;
   description?: string;
   params?: AppDocumentParams;
+  cardActions?: (doc: Document) => React.ReactNode;
+  onDocumentSend?: (doc: Document) => void;
 }
 
 function StatusBadge({ status, inverted }: { status: string; inverted?: boolean }) {
@@ -27,7 +30,7 @@ function StatusBadge({ status, inverted }: { status: string; inverted?: boolean 
   );
 }
 
-export function DocumentPageTemplate({ title, description, params }: DocumentPageTemplateProps) {
+export function DocumentPageTemplate({ title, description, params, cardActions, onDocumentSend }: DocumentPageTemplateProps) {
   const { data: documents, isLoading } = useAppDocuments(params);
   const [selectedDocId, setSelectedDocId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -177,6 +180,16 @@ export function DocumentPageTemplate({ title, description, params }: DocumentPag
                       {doc.fileType?.split("/").pop()?.split("+").shift() || "doc"}
                     </span>
                   </div>
+
+                  {cardActions && (
+                    <div
+                      className="mt-2 pt-2 flex justify-end"
+                      style={{ borderTop: isActive ? "1px solid rgba(255,255,255,0.2)" : "1px solid #eceef8" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {cardActions(doc)}
+                    </div>
+                  )}
                 </button>
               );
             })
@@ -186,7 +199,11 @@ export function DocumentPageTemplate({ title, description, params }: DocumentPag
 
       {selectedDoc && (
         <div className="flex-1 h-full p-4">
-          <DocumentViewer document={selectedDoc} onClose={() => setSelectedDocId(null)} />
+          <DocumentViewer
+            document={selectedDoc}
+            onClose={() => setSelectedDocId(null)}
+            onSend={onDocumentSend ? () => { onDocumentSend(selectedDoc); setSelectedDocId(null); } : undefined}
+          />
         </div>
       )}
     </div>
