@@ -1,0 +1,191 @@
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "wouter";
+
+export default function RegisterPage() {
+  const { register } = useAuth();
+  const [, navigate] = useLocation();
+  const [form, setForm] = useState({
+    nom: "",
+    prenom: "",
+    poste: "",
+    service: "",
+    email: "",
+    userId: "",
+    password: "",
+    confirmPassword: "",
+    signature: null as File | null,
+    acceptTerms: false,
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked, files } = e.target;
+    if (type === "file") {
+      setForm((f) => ({ ...f, signature: files?.[0] || null }));
+    } else if (type === "checkbox") {
+      setForm((f) => ({ ...f, [name]: checked }));
+    } else {
+      setForm((f) => ({ ...f, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (form.password !== form.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+    if (!form.acceptTerms) {
+      setError("Vous devez accepter les conditions générales.");
+      return;
+    }
+    setLoading(true);
+    const result = await register({
+      nom: form.nom,
+      prenom: form.prenom,
+      poste: form.poste,
+      service: form.service,
+      email: form.email,
+      userId: form.userId,
+      password: form.password,
+    });
+    setLoading(false);
+    if (result.ok) {
+      navigate("/inbox");
+    } else {
+      setError(result.error || "Inscription échouée.");
+    }
+  };
+
+  const Field = ({
+    label,
+    name,
+    type = "text",
+  }: {
+    label: string;
+    name: string;
+    type?: string;
+  }) => (
+    <div className="flex items-center gap-3 mb-3">
+      <span
+        className="w-52 text-right font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70"
+        style={{ color: "#1e1b6b" }}
+      >
+        {label}
+      </span>
+      <input
+        name={name}
+        type={type}
+        value={String((form as Record<string, unknown>)[name] ?? "")}
+        onChange={handleChange}
+        className="flex-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/80 text-sm outline-none"
+        style={{ color: "#1e1b6b" }}
+        required
+      />
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ background: "#c5c8e8" }}>
+      <div className="flex items-center gap-3 p-4 bg-white/60 border-b border-gray-200">
+        <img
+          src="/logo.jpg"
+          alt="HYDROGES"
+          className="w-10 h-10 rounded-full object-contain"
+        />
+        <span className="text-xl font-black" style={{ color: "#1e1b6b" }}>
+          HYDROGES
+        </span>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center py-8 px-4">
+        <div className="w-full max-w-xl bg-white/60 rounded-2xl p-8 shadow-md">
+          <h2
+            className="text-2xl font-black mb-6 text-center tracking-wide"
+            style={{ color: "#1e1b6b" }}
+          >
+            ENREGISTRER UN COMPTE
+          </h2>
+
+          {error && (
+            <div className="mb-4 p-3 rounded-xl text-sm text-red-700 bg-red-100">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <Field label="Nom" name="nom" />
+            <Field label="Prénom" name="prenom" />
+            <Field label="Poste" name="poste" />
+            <Field label="Service" name="service" />
+            <Field label="Email" name="email" type="email" />
+            <Field label="Nom d'utilisateur" name="userId" />
+            <Field label="Mot de passe" name="password" type="password" />
+            <Field
+              label="Confirmer le mot de passe"
+              name="confirmPassword"
+              type="password"
+            />
+
+            <div className="flex items-center gap-3 mb-4">
+              <span
+                className="w-52 text-right font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70"
+                style={{ color: "#1e1b6b" }}
+              >
+                Votre signature
+              </span>
+              <label className="hydroges-btn text-sm py-2 px-4 cursor-pointer">
+                Joindre +
+                <input
+                  type="file"
+                  name="signature"
+                  onChange={handleChange}
+                  className="hidden"
+                  accept="image/*"
+                />
+              </label>
+              {form.signature && (
+                <span className="text-xs text-green-700">{form.signature.name}</span>
+              )}
+            </div>
+
+            <label className="flex items-start gap-3 mb-6 cursor-pointer">
+              <input
+                type="checkbox"
+                name="acceptTerms"
+                checked={form.acceptTerms}
+                onChange={handleChange}
+                className="mt-1 w-4 h-4"
+              />
+              <span className="text-sm" style={{ color: "#1e1b6b" }}>
+                Pour terminer votre inscription, vous devez lire et accepter{" "}
+                <span className="font-bold underline">nos conditions générales</span>
+              </span>
+            </label>
+
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                disabled={loading}
+                className="hydroges-btn px-10 py-3 text-lg"
+                style={{ opacity: loading ? 0.7 : 1 }}
+              >
+                {loading ? "Inscription..." : "INSCRIPTION →"}
+              </button>
+            </div>
+          </form>
+
+          <p className="text-center text-sm mt-4" style={{ color: "#1e1b6b" }}>
+            Déjà un compte ?{" "}
+            <a href="/login" className="font-bold underline">
+              SE CONNECTER
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
