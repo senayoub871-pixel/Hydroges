@@ -28,7 +28,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: "#c5c8e8" }}>
       <div className="flex flex-col items-center mb-8">
-        <img src="/logo.jpg" alt="HYDROGES Logo" className="w-28 h-28 object-contain mb-2 rounded-full" />
+        <img src="/logo.png" alt="HYDROGES Logo" className="w-28 h-28 object-contain mb-2" />
         <h1 className="text-4xl font-black tracking-widest" style={{ color: "#1e1b6b" }}>HYDROGES</h1>
       </div>
 

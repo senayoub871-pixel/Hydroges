@@ -103,9 +103,9 @@ export default function RegisterPage() {
     <div className="min-h-screen flex flex-col" style={{ background: "#c5c8e8" }}>
       <div className="flex items-center gap-3 p-4 bg-white/60 border-b border-gray-200">
         <img
-          src="/logo.jpg"
+          src="/logo.png"
           alt="HYDROGES"
-          className="w-10 h-10 rounded-full object-contain"
+          className="w-10 h-10 object-contain"
         />
         <span className="text-xl font-black" style={{ color: "#1e1b6b" }}>
           HYDROGES

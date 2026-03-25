@@ -26,7 +26,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         {/* Left: Logo + Brand */}
         <div className="flex items-center gap-3">
-          <img src="/logo.jpg" alt="HYDROGES" className="w-11 h-11 rounded-full object-contain" />
+          <img src="/logo.png" alt="HYDROGES" className="w-11 h-11 object-contain" />
           <span
             className="text-2xl font-black tracking-widest"
             style={{ color: "#1e1b6b", letterSpacing: "0.12em" }}
