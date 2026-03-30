@@ -6,7 +6,7 @@ import { Building2, IdCard, Lock } from "lucide-react";
 export default function LoginPage() {
   const { login } = useAuth();
   const [, navigate] = useLocation();
-  const [companyNumber, setCompanyNumber] = useState("0125.6910.0681");
+  const companyNumber = "0125.6910.0681";
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -47,9 +47,10 @@ export default function LoginPage() {
             <input
               type="text"
               value={companyNumber}
-              onChange={(e) => setCompanyNumber(e.target.value)}
+              readOnly
               placeholder="0125.6910.0681"
               className="hydroges-input-field"
+              style={{ cursor: "default", userSelect: "none" }}
               required
             />
           </div>
