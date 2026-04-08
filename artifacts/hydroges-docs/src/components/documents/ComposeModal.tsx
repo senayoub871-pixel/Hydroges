@@ -24,6 +24,7 @@ export function ComposeModal({ open, onOpenChange }: ComposeModalProps) {
   const [scheduleSend, setScheduleSend] = useState(false);
   const [scheduleDate, setScheduleDate] = useState("");
   const [requiresSignature, setRequiresSignature] = useState(false);
+  const [recipientError, setRecipientError] = useState(false);
 
   const senderLabel = authUser?.role || "Expéditeur";
 
@@ -43,6 +44,7 @@ export function ComposeModal({ open, onOpenChange }: ComposeModalProps) {
     setScheduleSend(false);
     setScheduleDate("");
     setRequiresSignature(false);
+    setRecipientError(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -62,29 +64,16 @@ export function ComposeModal({ open, onOpenChange }: ComposeModalProps) {
   };
 
   const saveDraft = async () => {
-    if (!attachedFile || createMutation.isPending) return;
-
-    // Resolve recipient — fall back to sender as placeholder when none chosen
-    let draftRecipientId: number;
-    let draftRecipientName: string;
-    if (recipientId) {
-      const chosenUser = users?.find((u) => u.id.toString() === recipientId);
-      if (!chosenUser) return;
-      draftRecipientId = chosenUser.id;
-      draftRecipientName = chosenUser.name;
-    } else {
-      if (!authUser) return;
-      draftRecipientId = authUser.id;
-      draftRecipientName = authUser.name;
-    }
-
+    if (!attachedFile || !recipientId || createMutation.isPending) return;
+    const chosenUser = users?.find((u) => u.id.toString() === recipientId);
+    if (!chosenUser) return;
     const title = attachedFile.name.replace(/\.[^/.]+$/, "");
     try {
       await createMutation.mutateAsync({
         title,
         content: fileBase64,
-        recipientId: draftRecipientId,
-        recipientName: draftRecipientName,
+        recipientId: chosenUser.id,
+        recipientName: chosenUser.name,
         category: "Général",
         fileType: attachedFile.type || "application/octet-stream",
         scheduledAt: null,
@@ -99,10 +88,16 @@ export function ComposeModal({ open, onOpenChange }: ComposeModalProps) {
 
   const handleOpenChange = async (open: boolean) => {
     if (!open && !submittedRef.current) {
+      // File attached but no recipient — keep dialog open and flag the field
+      if (attachedFile && !recipientId) {
+        setRecipientError(true);
+        return;
+      }
       await saveDraft();
       resetForm();
     }
     submittedRef.current = false;
+    setRecipientError(false);
     onOpenChange(open);
   };
 
@@ -174,15 +169,21 @@ export function ComposeModal({ open, onOpenChange }: ComposeModalProps) {
 
           {/* À (recipient — registered users only) */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider mb-1" style={{ color: "#7b72b0" }}>
-              À
+            <label className="block text-xs font-bold uppercase tracking-wider mb-1" style={{ color: recipientError ? "#c0392b" : "#7b72b0" }}>
+              À {recipientError && <span className="normal-case font-normal">— choisissez un destinataire pour continuer</span>}
             </label>
             <select
               value={recipientId}
-              onChange={(e) => setRecipientId(e.target.value)}
+              onChange={(e) => { setRecipientId(e.target.value); setRecipientError(false); }}
               required
-              className="w-full px-4 py-2.5 rounded-xl text-sm font-medium outline-none"
-              style={{ background: "white", color: "#1e1b6b", border: "1.5px solid #dde0f0", cursor: "pointer" }}
+              className="w-full px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition-all"
+              style={{
+                background: recipientError ? "#fff5f5" : "white",
+                color: "#1e1b6b",
+                border: `1.5px solid ${recipientError ? "#e57373" : "#dde0f0"}`,
+                cursor: "pointer",
+                boxShadow: recipientError ? "0 0 0 3px rgba(229,115,115,0.15)" : "none",
+              }}
             >
               <option value="">— Choisir un employé —</option>
               {recipientUsers?.map((u) => (
