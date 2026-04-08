@@ -153,6 +153,31 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/verify-identity", async (req, res) => {
+  try {
+    const { loginId, email } = req.body;
+
+    if (!loginId || !email) {
+      res.status(400).json({ error: "Identifiant et email sont obligatoires" });
+      return;
+    }
+
+    const user = await db.query.usersTable.findFirst({
+      where: (u, { eq }) => eq(u.loginId, loginId),
+    });
+
+    if (!user || user.email?.toLowerCase() !== email.toLowerCase()) {
+      res.status(404).json({ error: "Aucun compte ne correspond à ces informations" });
+      return;
+    }
+
+    res.json({ ok: true, name: user.name });
+  } catch (err) {
+    req.log.error({ err }, "Failed to verify identity");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.post("/forgot-password", async (req, res) => {
   try {
     const { loginId, email, newPassword } = req.body;
