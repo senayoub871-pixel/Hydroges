@@ -62,16 +62,29 @@ export function ComposeModal({ open, onOpenChange }: ComposeModalProps) {
   };
 
   const saveDraft = async () => {
-    if (!recipientId || !attachedFile || createMutation.isPending) return;
-    const chosenUser = users?.find((u) => u.id.toString() === recipientId);
-    if (!chosenUser) return;
+    if (!attachedFile || createMutation.isPending) return;
+
+    // Resolve recipient — fall back to sender as placeholder when none chosen
+    let draftRecipientId: number;
+    let draftRecipientName: string;
+    if (recipientId) {
+      const chosenUser = users?.find((u) => u.id.toString() === recipientId);
+      if (!chosenUser) return;
+      draftRecipientId = chosenUser.id;
+      draftRecipientName = chosenUser.name;
+    } else {
+      if (!authUser) return;
+      draftRecipientId = authUser.id;
+      draftRecipientName = authUser.name;
+    }
+
     const title = attachedFile.name.replace(/\.[^/.]+$/, "");
     try {
       await createMutation.mutateAsync({
         title,
         content: fileBase64,
-        recipientId: chosenUser.id,
-        recipientName: chosenUser.name,
+        recipientId: draftRecipientId,
+        recipientName: draftRecipientName,
         category: "Général",
         fileType: attachedFile.type || "application/octet-stream",
         scheduledAt: null,
