@@ -26,6 +26,14 @@ export function ComposeModal({ open, onOpenChange }: ComposeModalProps) {
   const [requiresSignature, setRequiresSignature] = useState(false);
 
   const senderLabel = authUser?.role || "Expéditeur";
+
+  const displayFilename = (name: string, max = 45) => {
+    if (name.length <= max) return name;
+    const dotIdx = name.lastIndexOf(".");
+    const ext = dotIdx > 0 ? name.slice(dotIdx) : "";
+    return `${name.slice(0, max - ext.length - 3)}...${ext}`;
+  };
+
   const recipientUsers = users?.filter((u) => u.id !== authUser?.id);
 
   const resetForm = () => {
@@ -179,14 +187,14 @@ export function ComposeModal({ open, onOpenChange }: ComposeModalProps) {
             </label>
             {attachedFile ? (
               <div
-                className="flex items-center gap-2 px-4 py-3 rounded-xl"
+                className="flex items-center gap-2 px-4 py-3 rounded-xl w-full overflow-hidden"
                 style={{ background: "#f0eef8", border: "1.5px solid #c5b8e8" }}
               >
                 <Paperclip className="w-4 h-4 shrink-0" style={{ color: "#5b4d90" }} />
-                <span className="flex-1 min-w-0 text-sm font-medium truncate" style={{ color: "#1e1b6b" }}>
-                  {attachedFile.name}
+                <span className="flex-1 text-sm font-medium" style={{ color: "#1e1b6b", wordBreak: "break-all", overflowWrap: "anywhere" }}>
+                  {displayFilename(attachedFile.name)}
                 </span>
-                <span className="shrink-0 text-xs" style={{ color: "#9090b0" }}>
+                <span className="shrink-0 text-xs whitespace-nowrap" style={{ color: "#9090b0" }}>
                   ({(attachedFile.size / 1024).toFixed(0)} KB)
                 </span>
                 <button type="button" onClick={removeFile} className="shrink-0 p-1 rounded-full hover:bg-purple-100">
