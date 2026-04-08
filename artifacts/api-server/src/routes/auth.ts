@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
 import { signJwt, generateSalt, hashPassword, verifyPassword } from "../lib/auth";
 import { requireAuth } from "../middlewares/auth";
 
@@ -148,6 +149,44 @@ router.post("/login", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "Failed to login");
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { loginId, email, newPassword } = req.body;
+
+    if (!loginId || !email || !newPassword) {
+      res.status(400).json({ error: "Tous les champs sont obligatoires" });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      res.status(400).json({ error: "Le mot de passe doit contenir au moins 6 caractères" });
+      return;
+    }
+
+    const user = await db.query.usersTable.findFirst({
+      where: (u, { eq }) => eq(u.loginId, loginId),
+    });
+
+    if (!user || user.email?.toLowerCase() !== email.toLowerCase()) {
+      res.status(404).json({ error: "Aucun compte ne correspond à ces informations" });
+      return;
+    }
+
+    const salt = generateSalt();
+    const hash = hashPassword(newPassword, salt);
+
+    await db
+      .update(usersTable)
+      .set({ passwordHash: hash, passwordSalt: salt })
+      .where(eq(usersTable.loginId, loginId));
+
+    res.json({ ok: true });
+  } catch (err) {
+    req.log.error({ err }, "Failed to reset password");
     res.status(500).json({ error: "Internal server error" });
   }
 });

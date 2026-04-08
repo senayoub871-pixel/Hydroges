@@ -2,6 +2,36 @@ import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "wouter";
 
+interface FieldProps {
+  label: string;
+  name: string;
+  type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+function Field({ label, name, type = "text", value, onChange }: FieldProps) {
+  return (
+    <div className="flex items-center gap-3 mb-3">
+      <span
+        className="w-52 font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70 text-center"
+        style={{ color: "#1e1b6b" }}
+      >
+        {label}
+      </span>
+      <input
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        className="flex-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/80 text-sm outline-none"
+        style={{ color: "#1e1b6b" }}
+        required
+      />
+    </div>
+  );
+}
+
 export default function RegisterPage() {
   const { register } = useAuth();
   const [, navigate] = useLocation();
@@ -71,34 +101,6 @@ export default function RegisterPage() {
     }
   };
 
-  const Field = ({
-    label,
-    name,
-    type = "text",
-  }: {
-    label: string;
-    name: string;
-    type?: string;
-  }) => (
-    <div className="flex items-center gap-3 mb-3">
-      <span
-        className="w-52 font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70 text-center"
-        style={{ color: "#1e1b6b" }}
-      >
-        {label}
-      </span>
-      <input
-        name={name}
-        type={type}
-        value={String((form as Record<string, unknown>)[name] ?? "")}
-        onChange={handleChange}
-        className="flex-1 px-4 py-2 rounded-xl border border-gray-200 bg-white/80 text-sm outline-none"
-        style={{ color: "#1e1b6b" }}
-        required
-      />
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#c5c8e8" }}>
       <div className="flex items-center gap-3 p-4 bg-white/60 border-b border-gray-200">
@@ -128,17 +130,19 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit}>
-            <Field label="Nom" name="nom" />
-            <Field label="Prénom" name="prenom" />
-            <Field label="Poste" name="poste" />
-            <Field label="Service" name="service" />
-            <Field label="Email" name="email" type="email" />
-            <Field label="Nom d'utilisateur" name="userId" />
-            <Field label="Mot de passe" name="password" type="password" />
+            <Field label="Nom" name="nom" value={form.nom} onChange={handleChange} />
+            <Field label="Prénom" name="prenom" value={form.prenom} onChange={handleChange} />
+            <Field label="Poste" name="poste" value={form.poste} onChange={handleChange} />
+            <Field label="Service" name="service" value={form.service} onChange={handleChange} />
+            <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
+            <Field label="Nom d'utilisateur" name="userId" value={form.userId} onChange={handleChange} />
+            <Field label="Mot de passe" name="password" type="password" value={form.password} onChange={handleChange} />
             <Field
               label="Confirmer le mot de passe"
               name="confirmPassword"
               type="password"
+              value={form.confirmPassword}
+              onChange={handleChange}
             />
 
             <div className="flex items-center gap-3 mb-4">
