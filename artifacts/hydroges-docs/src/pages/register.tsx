@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation } from "wouter";
+import { ChevronDown } from "lucide-react";
+import { ORGANIGRAMME, getPostesForService } from "@/lib/organigramme";
 
 interface FieldProps {
   label: string;
@@ -14,7 +16,7 @@ function Field({ label, name, type = "text", value, onChange }: FieldProps) {
   return (
     <div className="flex items-center gap-3 mb-3">
       <span
-        className="w-52 font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70 text-center"
+        className="w-52 shrink-0 font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70 text-center"
         style={{ color: "#1e1b6b" }}
       >
         {label}
@@ -28,6 +30,52 @@ function Field({ label, name, type = "text", value, onChange }: FieldProps) {
         style={{ color: "#1e1b6b" }}
         required
       />
+    </div>
+  );
+}
+
+interface SelectFieldProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  options: string[];
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+function SelectField({ label, value, onChange, options, placeholder = "Sélectionner...", disabled }: SelectFieldProps) {
+  return (
+    <div className="flex items-center gap-3 mb-3">
+      <span
+        className="w-52 shrink-0 font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70 text-center"
+        style={{ color: "#1e1b6b" }}
+      >
+        {label}
+      </span>
+      <div className="relative flex-1">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+          required
+          className="w-full appearance-none px-4 py-2 pr-9 rounded-xl border border-gray-200 bg-white/80 text-sm outline-none cursor-pointer"
+          style={{
+            color: value ? "#1e1b6b" : "#9ca3af",
+            opacity: disabled ? 0.5 : 1,
+          }}
+        >
+          <option value="" disabled hidden>{placeholder}</option>
+          {options.map((opt) => (
+            <option key={opt} value={opt} style={{ color: "#1e1b6b" }}>
+              {opt}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4"
+          style={{ color: "#5b4d90" }}
+        />
+      </div>
     </div>
   );
 }
@@ -61,9 +109,21 @@ export default function RegisterPage() {
     }
   };
 
+  const handleServiceChange = (val: string) => {
+    setForm((f) => ({ ...f, service: val, poste: "" }));
+  };
+
+  const handlePosteChange = (val: string) => {
+    setForm((f) => ({ ...f, poste: val }));
+  };
+
+  const postesForService = getPostesForService(form.service);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!form.service) { setError("Veuillez sélectionner un service."); return; }
+    if (!form.poste) { setError("Veuillez sélectionner un poste."); return; }
     if (form.password !== form.confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
@@ -104,22 +164,13 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#c5c8e8" }}>
       <div className="flex items-center gap-3 p-4 bg-white/60 border-b border-gray-200">
-        <img
-          src="/logo.png"
-          alt="HYDROGES"
-          className="w-10 h-10 object-contain"
-        />
-        <span className="text-xl font-black" style={{ color: "#1e1b6b" }}>
-          HYDROGES
-        </span>
+        <img src="/logo.png" alt="HYDROGES" className="w-10 h-10 object-contain" />
+        <span className="text-xl font-black" style={{ color: "#1e1b6b" }}>HYDROGES</span>
       </div>
 
       <div className="flex-1 flex items-center justify-center py-8 px-4">
         <div className="w-full max-w-xl bg-white/60 rounded-2xl p-8 shadow-md">
-          <h2
-            className="text-2xl font-black mb-6 text-center tracking-wide"
-            style={{ color: "#1e1b6b" }}
-          >
+          <h2 className="text-2xl font-black mb-6 text-center tracking-wide" style={{ color: "#1e1b6b" }}>
             ENREGISTRER UN COMPTE
           </h2>
 
@@ -132,8 +183,24 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit}>
             <Field label="Nom" name="nom" value={form.nom} onChange={handleChange} />
             <Field label="Prénom" name="prenom" value={form.prenom} onChange={handleChange} />
-            <Field label="Poste" name="poste" value={form.poste} onChange={handleChange} />
-            <Field label="Service" name="service" value={form.service} onChange={handleChange} />
+
+            <SelectField
+              label="Service"
+              value={form.service}
+              onChange={handleServiceChange}
+              options={ORGANIGRAMME.map((s) => s.label)}
+              placeholder="Sélectionner un service..."
+            />
+
+            <SelectField
+              label="Poste"
+              value={form.poste}
+              onChange={handlePosteChange}
+              options={postesForService}
+              placeholder={form.service ? "Sélectionner un poste..." : "Choisissez d'abord un service"}
+              disabled={!form.service}
+            />
+
             <Field label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
             <Field label="Nom d'utilisateur" name="userId" value={form.userId} onChange={handleChange} />
             <Field label="Mot de passe" name="password" type="password" value={form.password} onChange={handleChange} />
@@ -147,7 +214,7 @@ export default function RegisterPage() {
 
             <div className="flex items-center gap-3 mb-4">
               <span
-                className="w-52 text-right font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70"
+                className="w-52 shrink-0 text-right font-bold text-sm px-3 py-2 rounded-xl border border-gray-200 bg-white/70"
                 style={{ color: "#1e1b6b" }}
               >
                 Votre signature
@@ -195,9 +262,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm mt-4" style={{ color: "#1e1b6b" }}>
             Déjà un compte ?{" "}
-            <a href="/login" className="font-bold underline">
-              SE CONNECTER
-            </a>
+            <a href="/login" className="font-bold underline">SE CONNECTER</a>
           </p>
         </div>
       </div>
