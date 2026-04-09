@@ -18,6 +18,8 @@ import SettingsPage from "@/pages/settings";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import NotFound from "@/pages/not-found";
+import ClaimsPage from "@/pages/claims";
+import MarketPage from "@/pages/market";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,6 +76,12 @@ function Router() {
         </Route>
         <Route path="/settings">
           <ProtectedRoute><SettingsPage /></ProtectedRoute>
+        </Route>
+        <Route path="/claims">
+          <ProtectedRoute><ClaimsPage /></ProtectedRoute>
+        </Route>
+        <Route path="/market">
+          <ProtectedRoute><MarketPage /></ProtectedRoute>
         </Route>
         <Route component={NotFound} />
       </Switch>
